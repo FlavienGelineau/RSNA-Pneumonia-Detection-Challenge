@@ -1,27 +1,19 @@
 import os
-print('prout')
-
 from data_processing.generator_definition import generator
 from data_processing.loading_data import load_filenames, load_pneumonia_locations
 from model.cnn_segmentation import create_network, iou_bce_loss, mean_iou
-
-print('prout')
-
 import tensorflow as tf
 
-print('prout')
-
 import numpy as np
+import keras
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from skimage.transform import resize
 from skimage import measure
 
-print('prout')
-
 BATCH_SIZE = 16
-IMAGE_SIZE = 320
+IMAGE_SIZE = 400
 
 model = create_network(input_size=IMAGE_SIZE, channels=32, n_blocks=2, depth=4)
 model.compile(optimizer='adam',
@@ -37,6 +29,7 @@ def cosine_annealing(x):
 
 
 learning_rate = tf.keras.callbacks.LearningRateScheduler(cosine_annealing)
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # create train and validation generators
 folder = '../data/input/stage_1_train_images'
@@ -50,8 +43,15 @@ valid_gen = generator(folder, valid_filenames, pneumonia_locations, batch_size=B
                       shuffle=False, predict=False)
 
 print(model.summary())
+keras.backend.get_session().run(tf.global_variables_initializer())
 
-history = model.fit_generator(train_gen, validation_data=valid_gen, callbacks=[learning_rate], epochs=15, shuffle=True)
+early_stop = EarlyStopping(patience=10)
+checkpoint = ModelCheckpoint(filepath='weights_rsna.hdf5')
+history = model.fit_generator(train_gen,
+                              validation_data=valid_gen,
+                              callbacks=[early_stop, checkpoint],
+                              epochs=30000,
+                              shuffle=True)
 
 plt.figure(figsize=(12, 4))
 plt.subplot(131)

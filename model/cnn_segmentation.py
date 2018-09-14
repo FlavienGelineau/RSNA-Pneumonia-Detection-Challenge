@@ -33,7 +33,10 @@ def create_network(input_size, channels, n_blocks=2, depth=4):
     x = keras.layers.Conv2D(256, 1, activation=None)(x)
     x = keras.layers.BatchNormalization(momentum=0.9)(x)
     x = keras.layers.LeakyReLU(0)(x)
-    x = keras.layers.Conv2DTranspose(128, (8,8), (4,4), padding="same", activation=None)(x)
+    x = keras.layers.Conv2DTranspose(filters = 128,
+                                     kernel_size = (8,8),
+                                     strides = (4,4),
+                                     padding="same", activation=None)(x)
     x = keras.layers.BatchNormalization(momentum=0.9)(x)
     x = keras.layers.LeakyReLU(0)(x)
     x = keras.layers.Conv2D(1, 1, activation='sigmoid')(x)
