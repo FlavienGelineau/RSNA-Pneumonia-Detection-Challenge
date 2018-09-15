@@ -3,6 +3,8 @@ import random
 import keras
 import numpy as np
 from skimage.transform import resize
+from skimage import exposure
+
 import pydicom
 
 
@@ -41,6 +43,7 @@ class generator(keras.utils.Sequence):
             msk = np.fliplr(msk)
         # resize both image and mask
         img = resize(img, (self.image_size, self.image_size), mode='reflect')
+
         msk = resize(msk, (self.image_size, self.image_size), mode='reflect') > 0.5
         # add trailing channel dimension
         img = np.expand_dims(img, -1)

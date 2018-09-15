@@ -31,8 +31,8 @@ if __name__ == '__main__':
     IMAGE_SIZE = 400
     do_plot_graphs = False
 
-    folder_train = '../data/input/stage_1_train_images'
-    folder_test = '../data/input/stage_1_test_images'
+    folder_train = '../data/preprocessed_input/stage_1_train_images'
+    folder_test = '../data/preprocessed_input/stage_1_test_images'
 
     test_filenames = os.listdir(folder_test)
 
