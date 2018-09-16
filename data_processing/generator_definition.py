@@ -2,12 +2,16 @@ import os
 import random
 import keras
 import numpy as np
+from PIL import Image
 from skimage.transform import resize
 from skimage import exposure
 
 import pydicom
 
-
+def load_image( infilename ) :
+    img = Image.open( infilename )
+    img.load()
+    return np.asarray( img, dtype="int32")
 
 class generator(keras.utils.Sequence):
 
