@@ -10,7 +10,6 @@ import pydicom
 
 def load_image( infilename ) :
     img = Image.open( infilename )
-    img.load()
     return np.asarray( img, dtype="int32")
 
 class generator(keras.utils.Sequence):
@@ -29,7 +28,9 @@ class generator(keras.utils.Sequence):
 
     def __load__(self, filename):
         # load dicom file as numpy array
-        img = pydicom.dcmread(os.path.join(self.folder, filename)).pixel_array
+        #img = pydicom.dcmread(os.path.join(self.folder, filename)).pixel_array
+        img = load_image(os.path.join(self.folder, filename))
+
         # create empty mask
         msk = np.zeros(img.shape)
         # get filename without extension

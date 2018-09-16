@@ -1,6 +1,7 @@
 import os
 
 import pydicom
+from PIL import Image
 from skimage import exposure
 import scipy.misc
 
@@ -29,7 +30,8 @@ if __name__ == '__main__':
             dicom = pydicom.dcmread(os.path.join(path, img_name))
             img_array = equalize_and_convert(dicom)
 
-            scipy.misc.imsave('{}/{}.jpg'.format(processed_path, img_name), img_array)
+            data = Image.fromarray(img_array)
+            data.convert("L").save(os.path.join(OUTPUT_TEST, img_name + ".bmp"))
 
 
 
