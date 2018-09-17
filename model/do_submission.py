@@ -54,7 +54,7 @@ def make_submission(model,
 
 
 if __name__ == '__main__':
-    folder_test = '../data/input/stage_1_test_images'
+    folder_test = '../data/preprocessed_input/stage_1_test_images'
     BATCH_SIZE = 16
     IMAGE_SIZE = 400
 

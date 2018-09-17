@@ -31,7 +31,7 @@ if __name__ == '__main__':
             img_array = equalize_and_convert(dicom)
 
             data = Image.fromarray(img_array)
-            data.convert("L").save(os.path.join(OUTPUT_TEST, img_name + ".bmp"))
+            data.convert("L").save(os.path.join(processed_path, img_name + ".bmp"))
 
 
 

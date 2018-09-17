@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # create train and validation generators
 
-    train_filenames, valid_filenames = load_filenames(n_valid_samples=2560)
+    train_filenames, valid_filenames = load_filenames(n_valid_samples=2560, folder = folder_train)
     pneumonia_locations = load_pneumonia_locations()
 
     train_gen = generator(folder_train, train_filenames, pneumonia_locations, batch_size=BATCH_SIZE,
