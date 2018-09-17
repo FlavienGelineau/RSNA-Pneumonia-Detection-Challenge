@@ -34,4 +34,4 @@ if __name__ == '__main__':
     for path, processed_path in zip(paths, processed_paths):
         print('path ', path)
         img_names = os.listdir(path)
-        Parallel(n_jobs=8)(delayed(equalize)(i, img_name) for i, img_name in enumerate(img_names))
+        Parallel(n_jobs=-1)(delayed(equalize)(i, img_name) for i, img_name in enumerate(img_names))
