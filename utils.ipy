@@ -1,0 +1,9 @@
+#!/usr/local/bin/ipython
+!rm -rf ./data/preprocessed_input
+dirnames = !ls -d ./data/input/*/
+for dir in dirnames:
+    dir = dir.split("/")
+    dir.pop()
+    dir = dir.pop()
+    !mkdir -p ./data/preprocessed_input/{dir}
+!cd ./data_processing && python3 equalize_contrast.py
