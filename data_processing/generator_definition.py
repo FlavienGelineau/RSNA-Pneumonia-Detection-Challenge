@@ -8,9 +8,25 @@ from skimage import exposure
 
 import pydicom
 
-def load_image( infilename ) :
-    img = Image.open( infilename )
-    return np.asarray( img, dtype="int32")
+
+def load_image(infilename):
+    img = Image.open(infilename)
+    return np.asarray(img, dtype="int32")
+
+
+def compute_mask(pneumonia_locations, shape, filename):
+    msk = np.zeros(shape)
+    # get filename without extension
+    filename = filename.split('.')[0]
+    # if image contains pneumonia
+    if filename in pneumonia_locations:
+        # loop through pneumonia
+        for location in pneumonia_locations[filename]:
+            # add 1's at the location of the pneumonia
+            x, y, w, h = location
+            msk[y:y + h, x:x + w] = 1
+    return msk
+
 
 class generator(keras.utils.Sequence):
 
@@ -27,40 +43,26 @@ class generator(keras.utils.Sequence):
         self.on_epoch_end()
 
     def __load__(self, filename):
-        # load dicom file as numpy array
-        #img = pydicom.dcmread(os.path.join(self.folder, filename)).pixel_array
-        img = load_image(os.path.join(self.folder, filename))
 
-        # create empty mask
-        msk = np.zeros(img.shape)
-        # get filename without extension
-        filename = filename.split('.')[0]
-        # if image contains pneumonia
-        if filename in self.pneumonia_locations:
-            # loop through pneumonia
-            for location in self.pneumonia_locations[filename]:
-                # add 1's at the location of the pneumonia
-                x, y, w, h = location
-                msk[y:y + h, x:x + w] = 1
-        # if augment then horizontal flip half the time
+        img = load_image(os.path.join(self.folder, filename))
+        msk = compute_mask(self.pneumonia_locations, img.shape, filename)
+
         if self.augment and random.random() > 0.5:
             img = np.fliplr(img)
             msk = np.fliplr(msk)
+
         # resize both image and mask
         img = resize(img, (self.image_size, self.image_size), mode='reflect')
-
         msk = resize(msk, (self.image_size, self.image_size), mode='reflect') > 0.5
+
         # add trailing channel dimension
         img = np.expand_dims(img, -1)
         msk = np.expand_dims(msk, -1)
         return img, msk
 
     def __loadpredict__(self, filename):
-        # load dicom file as numpy array
         img = load_image(os.path.join(self.folder, filename))
-        # resize image
         img = resize(img, (self.image_size, self.image_size), mode='reflect')
-        # add trailing channel dimension
         img = np.expand_dims(img, -1)
         return img
 
