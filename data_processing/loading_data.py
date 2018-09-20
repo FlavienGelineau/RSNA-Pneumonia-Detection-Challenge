@@ -3,6 +3,11 @@ import csv
 import os
 import random
 
+from keras import Input, Model
+from keras.layers import Conv2D, Concatenate
+
+from paths import LABEL_PATHS
+
 
 def load_pneumonia_locations():
     """
@@ -13,7 +18,7 @@ def load_pneumonia_locations():
     pneumonia_locations = {}
     # load table
 
-    with open(os.path.join('../data/input/stage_1_train_labels.csv'), mode='r') as infile:
+    with open(os.path.join(LABEL_PATHS), mode='r') as infile:
         # open reader
         reader = csv.reader(infile)
         # skip header

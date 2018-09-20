@@ -8,14 +8,15 @@ from data_processing.generator_definition import generator
 from data_processing.loading_data import load_filenames, load_pneumonia_locations
 import numpy as np
 from model.cnn_segmentation import create_network, iou_bce_loss, mean_iou
-from paths import INPUT_TRAIN, INPUT_TEST, OUTPUT_TRAIN, OUTPUT_TEST
+from paths import INPUT_TRAIN, INPUT_TEST, OUTPUT_TRAIN, OUTPUT_TEST, INPUT_TRAIN_MODEL, INPUT_TEST_MODEL
 
+np.random.seed(42)
 
 def get_callbacks():
     early_stop = EarlyStopping(patience=5)
 
     filepath = "weights/weights-improvement-{epoch:02d}-{val_loss:.5f}.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+    checkpoint = ModelCheckpoint(filepath, monitor='val_loss', save_best_only=False, verbose=1)
 
     # cosine learning rate annealing
     def cosine_annealing(x):
@@ -30,12 +31,12 @@ def get_callbacks():
 
 
 if __name__ == '__main__':
-    BATCH_SIZE = 8
+    BATCH_SIZE = 16
     IMAGE_SIZE = 320
     do_plot_graphs = False
 
-    folder_train = INPUT_TRAIN
-    folder_test = INPUT_TEST
+    folder_train = INPUT_TRAIN_MODEL
+    folder_test = INPUT_TEST_MODEL
 
     test_filenames = os.listdir(folder_test)
 
@@ -43,6 +44,10 @@ if __name__ == '__main__':
     model.compile(optimizer='adam',
                   loss=iou_bce_loss,
                   metrics=['accuracy', mean_iou])
+    try:
+        model.load_weights('weights/weights-improvement-01-0.97.hdf5')
+    except:
+        print('model weights couldnt have been loaded')
 
     # create train and validation generators
 

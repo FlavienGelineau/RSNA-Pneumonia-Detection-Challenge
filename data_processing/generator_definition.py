@@ -9,7 +9,7 @@ from skimage.transform import resize
 
 def load_image(infilename):
     img = Image.open(infilename)
-    return np.asarray(img, dtype="int32")
+    return np.asarray(img, dtype="int32")/255
 
 
 def compute_mask(pneumonia_locations, shape, filename):
@@ -23,6 +23,7 @@ def compute_mask(pneumonia_locations, shape, filename):
             # add 1's at the location of the pneumonia
             x, y, w, h = location
             msk[y:y + h, x:x + w] = 1
+
     return msk
 
 
@@ -50,18 +51,18 @@ class generator(keras.utils.Sequence):
         """
         img = load_image(os.path.join(self.folder, filename))
         msk = compute_mask(self.pneumonia_locations, img.shape, filename)
-
         if self.augment and random.random() > 0.5:
             img = np.fliplr(img)
             msk = np.fliplr(msk)
-
         # resize both image and mask
         img = resize(img, (self.image_size, self.image_size), mode='reflect')
         msk = resize(msk, (self.image_size, self.image_size), mode='reflect') > 0.5
 
+
         # add trailing channel dimension
         img = np.expand_dims(img, -1)
         msk = np.expand_dims(msk, -1)
+
         return img, msk
 
     def __loadpredict__(self, filename):
