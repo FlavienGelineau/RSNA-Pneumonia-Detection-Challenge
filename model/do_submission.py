@@ -7,6 +7,8 @@ from skimage.transform import resize
 from skimage import measure
 import numpy as np
 import pandas as pd
+
+from model.pred_construction import compute_pred_with_mask
 from paths import OUTPUT_TEST, OUTPUT_TRAIN
 
 def make_submission(model,
@@ -22,25 +24,11 @@ def make_submission(model,
         for pred, filename in zip(preds, filenames):
             # resize predicted mask
             pred = resize(pred, (1024, 1024), mode='reflect')
+            prediction_string = compute_pred_with_mask(pred)
 
-            # threshold predicted mask
-            comp = pred[:, :, 0] > 0.5
-            # apply connected components
-            comp = measure.label(comp)
-            # apply bounding boxes
-            predictionString = ''
-            for region in measure.regionprops(comp):
-                # retrieve x, y, height and width
-                y, x, y2, x2 = region.bbox
-                height = y2 - y
-                width = x2 - x
-                # proxy for confidence score
-                conf = np.mean(pred[y:y + height, x:x + width])
-                # add to predictionString
-                predictionString += str(conf) + ' ' + str(x) + ' ' + str(y) + ' ' + str(width) + ' ' + str(height) + ' '
-            # add filename and predictionString to dictionary
+            # add filename and prediction_string to dictionary
             filename = filename.split('.')[0]
-            submission_dict[filename] = predictionString
+            submission_dict[filename] = prediction_string
         # stop if we've got them all
         if len(submission_dict) >= len(test_filenames):
             break
