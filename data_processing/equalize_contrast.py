@@ -1,11 +1,12 @@
 import os
-from joblib import Parallel, delayed
+
 import pydicom
+import scipy.misc
+from joblib import Parallel, delayed
 from PIL import Image
 from skimage import exposure
-import scipy.misc
 
-from paths import INPUT_TRAIN, INPUT_TEST, OUTPUT_TRAIN, OUTPUT_TEST
+from paths import INPUT_TEST, INPUT_TRAIN, OUTPUT_TEST, OUTPUT_TRAIN
 
 
 def equalize_and_convert(dicom):
