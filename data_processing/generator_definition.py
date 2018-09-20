@@ -57,7 +57,7 @@ class generator(keras.utils.Sequence):
 
     def __loadpredict__(self, filename):
         # load dicom file as numpy array
-        img = pydicom.dcmread(os.path.join(self.folder, filename)).pixel_array
+        img = load_image(os.path.join(self.folder, filename))
         # resize image
         img = resize(img, (self.image_size, self.image_size), mode='reflect')
         # add trailing channel dimension

@@ -7,7 +7,7 @@ from skimage.transform import resize
 from skimage import measure
 import numpy as np
 import pandas as pd
-
+from paths import OUTPUT_TEST, OUTPUT_TRAIN
 
 def make_submission(model,
                     test_gen,
@@ -22,6 +22,7 @@ def make_submission(model,
         for pred, filename in zip(preds, filenames):
             # resize predicted mask
             pred = resize(pred, (1024, 1024), mode='reflect')
+
             # threshold predicted mask
             comp = pred[:, :, 0] > 0.5
             # apply connected components
@@ -54,11 +55,10 @@ def make_submission(model,
 
 
 if __name__ == '__main__':
-    folder_test = '../data/preprocessed_input/stage_1_test_images'
-    BATCH_SIZE = 16
-    IMAGE_SIZE = 400
+    BATCH_SIZE = 8
+    IMAGE_SIZE = 320
 
-    test_filenames = os.listdir(folder_test)
+    test_filenames = os.listdir(OUTPUT_TEST)
 
     model = create_network(input_size=IMAGE_SIZE, channels=32, n_blocks=2, depth=4)
     model.compile(optimizer='adam',
@@ -66,10 +66,10 @@ if __name__ == '__main__':
                   metrics=['accuracy', mean_iou])
     model.load_weights('weights_rsna.hdf5')
 
-    test_gen = generator(folder_test,
+    test_gen = generator(OUTPUT_TEST,
                          filenames=test_filenames,
                          pneumonia_locations=None,
-                         batch_size=16,
+                         batch_size=BATCH_SIZE,
                          image_size=IMAGE_SIZE,
                          shuffle=False,
                          predict=True)

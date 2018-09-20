@@ -5,10 +5,7 @@ import pydicom
 import scipy.misc
 from PIL import Image
 
-INPUT_TRAIN = '../data/input/stage_1_train_images'
-INPUT_TEST = '../data/input/stage_1_test_images'
-OUTPUT_TRAIN = '../data/preprocessed_input/stage_1_train_images'
-OUTPUT_TEST = '../data/preprocessed_input/stage_1_test_images'
+from paths import INPUT_TRAIN, INPUT_TEST, OUTPUT_TRAIN, OUTPUT_TEST
 
 
 def load_image(infilename):
