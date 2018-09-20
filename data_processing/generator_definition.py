@@ -41,7 +41,13 @@ class generator(keras.utils.Sequence):
         self.on_epoch_end()
 
     def __load__(self, filename):
+        """
+        Interrogations concerning the data augmentation: why not double the dataset ?
+        Dataset moving over the time.
 
+        :param filename:
+        :return:
+        """
         img = load_image(os.path.join(self.folder, filename))
         msk = compute_mask(self.pneumonia_locations, img.shape, filename)
 
