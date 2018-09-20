@@ -4,7 +4,7 @@ import pydicom
 from PIL import Image
 from skimage import exposure
 import scipy.misc
-
+from utils import progress
 INPUT_TRAIN = '../data/input/stage_1_train_images'
 INPUT_TEST =  '../data/input/stage_1_test_images'
 OUTPUT_TRAIN = '../data/preprocessed_input/stage_1_train_images'
@@ -20,7 +20,8 @@ def equalize_and_convert(dicom):
 
 
 def equalize(i, img_name):
-    print('{} out of {}'.format(i, len(img_names)))
+    # print('{} out of {}'.format(i, len(img_names)))
+    progress("Equalizing", i, len(img_names))
     dicom = pydicom.dcmread(os.path.join(path, img_name))
     img_array = equalize_and_convert(dicom)
     data = Image.fromarray(img_array)
