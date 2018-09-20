@@ -5,6 +5,11 @@ import random
 
 
 def load_pneumonia_locations():
+    """
+    Compute and returns pneumonia locations from label file.
+
+    :return: pneumonia_locations, a dict. keys are filename, values are masks.
+    """
     pneumonia_locations = {}
     # load table
 

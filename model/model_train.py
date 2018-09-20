@@ -8,11 +8,14 @@ from data_processing.generator_definition import generator
 from data_processing.loading_data import load_filenames, load_pneumonia_locations
 import numpy as np
 from model.cnn_segmentation import create_network, iou_bce_loss, mean_iou
+from paths import INPUT_TRAIN, INPUT_TEST, OUTPUT_TRAIN, OUTPUT_TEST
 
 
 def get_callbacks():
-    early_stop = EarlyStopping(patience=10)
-    checkpoint = ModelCheckpoint(filepath='weights_rsna.hdf5')
+    early_stop = EarlyStopping(patience=5)
+
+    filepath = "weights/weights-improvement-{epoch:02d}-{val_loss:.5f}.hdf5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
     # cosine learning rate annealing
     def cosine_annealing(x):
@@ -27,12 +30,12 @@ def get_callbacks():
 
 
 if __name__ == '__main__':
-    BATCH_SIZE = 16
-    IMAGE_SIZE = 400
+    BATCH_SIZE = 8
+    IMAGE_SIZE = 320
     do_plot_graphs = False
 
-    folder_train = '../data/preprocessed_input/stage_1_train_images'
-    folder_test = '../data/preprocessed_input/stage_1_test_images'
+    folder_train = INPUT_TRAIN
+    folder_test = INPUT_TEST
 
     test_filenames = os.listdir(folder_test)
 
