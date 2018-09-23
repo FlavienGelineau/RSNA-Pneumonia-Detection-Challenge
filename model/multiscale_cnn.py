@@ -22,6 +22,7 @@ def create_resblock(channels, inputs):
     x = Conv2D(channels, 3, padding='same', use_bias=False)(x)
     return keras.layers.add([x, inputs])
 
+
 # local network use high-res moving window
 def create_local_network(channels, input, depth, n_blocks):
     x = Conv2D(channels, 3, padding='same', use_bias=False)(input)
@@ -46,9 +47,9 @@ def create_local_network(channels, input, depth, n_blocks):
     x = Conv2D(1, 1, activation=None)(x)
     return x
 
+
 # subnetworks that handle low-resolution global image
 def create_subnetwork(channels, input, depth, n_blocks):
-
     x = Conv2D(channels, 3, padding='same', use_bias=False)(input)
     # residual blocks
     for d in range(depth):
@@ -71,6 +72,7 @@ def create_subnetwork(channels, input, depth, n_blocks):
     x = Conv2D(1, 1, activation=None)(x)
     return x
 
+
 # Network that handles position in the global image
 def create_global_network(channels, input1, input2, depth1, n_blocks1, depth2, n_blocks2):
     x = create_subnetwork(channels, input1, depth1, n_blocks1)
@@ -82,6 +84,7 @@ def create_global_network(channels, input1, input2, depth1, n_blocks1, depth2, n
     x = Conv2D(channels, 3, padding='same', use_bias=False)(input)
     return x
 
+
 def create_network(local_input_size, global_input_size, channels, n_blocks=2, depth=4):
     # inputs
     local_inputs = keras.Input(shape=(local_input_size, local_input_size, 1))
@@ -91,7 +94,8 @@ def create_network(local_input_size, global_input_size, channels, n_blocks=2, de
         shape=(global_input_size, global_input_size, 1))
 
     local_net = create_local_network(channels, local_inputs, depth, n_blocks)
-    global_net = create_global_network(channels, global_map_inputs, global_position_inputs, depth, n_blocks, depth, n_blocks)
+    global_net = create_global_network(channels, global_map_inputs, global_position_inputs, depth, n_blocks, depth,
+                                       n_blocks)
     x = Concatenate([local_net, global_net])
     # residual blocks
     for d in range(depth):
