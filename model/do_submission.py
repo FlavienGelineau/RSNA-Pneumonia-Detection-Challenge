@@ -18,6 +18,7 @@ def make_submission(model,
                     test_gen,
                     test_filenames,
                     submission_name='submission.csv'):
+    """Compute submission with precendtly trained neural network. Assert neural network has precedently been trained."""
     submission_dict = {}
     # loop through testset
     for imgs, filenames in test_gen:
@@ -45,7 +46,6 @@ def make_submission(model,
     sub.to_csv(submission_name)
 
 
-
 if __name__ == '__main__':
     BATCH_SIZE = 32
     IMAGE_SIZE = 320
@@ -58,7 +58,7 @@ if __name__ == '__main__':
                   metrics=['accuracy', mean_iou])
     model.load_weights('weights/weights-improvement-12-0.40490.hdf5')
 
-    train_filenames, valid_filenames = load_filenames(n_valid_samples=2560, folder = INPUT_TRAIN_MODEL)
+    train_filenames, valid_filenames = load_filenames(n_valid_samples=2560, folder=INPUT_TRAIN_MODEL)
     pneumonia_locations = load_pneumonia_locations()
 
     valid_gen = generator(INPUT_TRAIN_MODEL, valid_filenames, pneumonia_locations, batch_size=BATCH_SIZE,

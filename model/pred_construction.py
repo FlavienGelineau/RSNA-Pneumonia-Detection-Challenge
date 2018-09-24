@@ -1,6 +1,7 @@
 from skimage import measure
 import numpy as np
 
+
 def compute_pred_with_mask(pred):
     comp = pred[:, :, 0] > 0.5
     # apply connected components
