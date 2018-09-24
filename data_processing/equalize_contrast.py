@@ -33,8 +33,8 @@ def equalize(i, img_name, path, processed_path, img_names):
 
 
 if __name__ == '__main__':
-    paths = [INPUT_TEST, INPUT_TRAIN]
-    processed_paths = [OUTPUT_TEST, OUTPUT_TRAIN]
+    paths = [INPUT_TEST]
+    processed_paths = [OUTPUT_TEST]
 
     for path, processed_path in zip(paths, processed_paths):
         print('path ', path)
