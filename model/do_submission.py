@@ -21,7 +21,6 @@ def make_submission(model,
     submission_dict = {}
     # loop through testset
     for imgs, filenames in test_gen:
-        print(imgs)
         # predict batch of images
         preds = model.predict(imgs)
         # loop through batch
@@ -57,7 +56,7 @@ if __name__ == '__main__':
     model.compile(optimizer='adam',
                   loss=iou_bce_loss,
                   metrics=['accuracy', mean_iou])
-    model.load_weights('weights/weights-improvement-01-0.43782.hdf5')
+    model.load_weights('weights/weights-improvement-12-0.40490.hdf5')
 
     train_filenames, valid_filenames = load_filenames(n_valid_samples=2560, folder = INPUT_TRAIN_MODEL)
     pneumonia_locations = load_pneumonia_locations()
@@ -68,7 +67,7 @@ if __name__ == '__main__':
     train_gen = generator(INPUT_TRAIN_MODEL, train_filenames, pneumonia_locations, batch_size=BATCH_SIZE,
                           image_size=IMAGE_SIZE, shuffle=False, predict=False)
 
-    check_model_on_val(train_gen, model)
+    check_model_on_val(valid_gen, model)
 
     test_gen = generator(INPUT_TEST_MODEL,
                          filenames=test_filenames,
