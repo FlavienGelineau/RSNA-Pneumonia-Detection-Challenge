@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 from PIL import Image
 from skimage import exposure
 
-from data_processing.utils import progress
+from utils import progress
 from paths import INPUT_TEST, INPUT_TRAIN, OUTPUT_TEST, OUTPUT_TRAIN
 
 
