@@ -2,6 +2,7 @@ import os
 
 import gc
 import keras
+import sys
 import tensorflow as tf
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler
 
@@ -32,7 +33,7 @@ def get_callbacks(img_size, batch_size):
 
 
 if __name__ == '__main__':
-    BATCH_SIZE = 9
+    BATCH_SIZE = 10
     IMAGE_SIZE = 512
     do_plot_graphs = False
 
@@ -42,12 +43,13 @@ if __name__ == '__main__':
     test_filenames = os.listdir(folder_test)
 
     model = create_network(input_size=IMAGE_SIZE, channels=24, n_blocks=2, depth=4)
+    print(model.summary())
     model.save_weights('weights/initial_weights_{}.hdf5'.format(IMAGE_SIZE))
     model.compile(optimizer='adam',
                   loss=iou_bce_loss,
                   metrics=['accuracy', mean_iou])
     try:
-        model.load_weights('weights/weights-improvement-12-0.39942.hdf5')
+        model.load_weights('None')
     except:
         print('model weights couldnt have been loaded')
 
@@ -67,7 +69,7 @@ if __name__ == '__main__':
 
     history = model.fit_generator(train_gen,
                                   validation_data=valid_gen,
-                                  callbacks=get_callbacks(),
+                                  callbacks=get_callbacks(IMAGE_SIZE, BATCH_SIZE),
                                   epochs=30000,
                                   shuffle=True)
     del model
@@ -78,6 +80,6 @@ if __name__ == '__main__':
 
     history = model.fit_generator(train_gen,
                                   validation_data=valid_gen,
-                                  callbacks=get_callbacks(),
+                                  callbacks=get_callbacks(IMAGE_SIZE, BATCH_SIZE),
                                   epochs=30000,
                                   shuffle=True)

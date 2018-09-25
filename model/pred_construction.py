@@ -1,9 +1,10 @@
 from skimage import measure
 import numpy as np
+import pandas as pd
 
-
-def compute_pred_with_mask(pred):
-    comp = pred[:, :, 0] > 0.5
+def compute_pred_with_mask(pred, filename):
+    threshold = compute_optimal_threshold(filename)
+    comp = pred[:, :, 0] > threshold
     # apply connected components
     comp = measure.label(comp)
     # apply bounding boxes
@@ -18,3 +19,12 @@ def compute_pred_with_mask(pred):
         # add to predictionString
         prediction_string += str(conf) + ' ' + str(x) + ' ' + str(y) + ' ' + str(width) + ' ' + str(height) + ' '
     return prediction_string
+
+
+def compute_optimal_threshold(filename):
+    metadata = pd.read_csv('../meta_data_processing/test_metadata.csv')
+    data = metadata[metadata['filenames']==filename]
+    if data['ViewPosition']=='AP':
+        return 0.25
+    else:
+        return 0.5

@@ -14,21 +14,62 @@ from model.pred_construction import compute_pred_with_mask
 from paths import OUTPUT_TEST, OUTPUT_TRAIN, INPUT_TRAIN, INPUT_TRAIN_MODEL, INPUT_TEST_MODEL
 
 
-def make_submission(model,
-                    test_gen,
+def get_models():
+    model1 = create_network(input_size=512, channels=24, n_blocks=2, depth=4)
+    model1.compile(optimizer='adam',
+                   loss=iou_bce_loss,
+                   metrics=['accuracy', mean_iou])
+    model1.load_weights('weights/weights-22-0.40075-512-10_public_0118.hdf5')
+
+    model2 = create_network(input_size=320, channels=32, n_blocks=2, depth=4)
+    model2.compile(optimizer='adam',
+                   loss=iou_bce_loss,
+                   metrics=['accuracy', mean_iou])
+    model2.load_weights('weights/weights-improvement-13-0.39958_public_0122.hdf5')
+
+    model3 = create_network(input_size=320, channels=32, n_blocks=2, depth=4)
+    model3.compile(optimizer='adam',
+                   loss=iou_bce_loss,
+                   metrics=['accuracy', mean_iou])
+    model3.load_weights('weights/weights-improvement-18-0.40025_public_0118.hdf5')
+
+    return [[model1, 512], [model2, 320], [model3, 320]]
+
+
+def make_submission(models,
+                    test_gen_320,
+                    test_gen_512,
                     test_filenames,
+                    batch_size,
                     submission_name='submission.csv'):
     """Compute submission with precendtly trained neural network. Assert neural network has precedently been trained."""
     submission_dict = {}
     # loop through testset
-    for imgs, filenames in test_gen:
+    for (imgs_320, _), (imgs_512, filenames) in zip(test_gen_320, test_gen_512):
         # predict batch of images
-        preds = model.predict(imgs)
+        if models[0][1] == 320:
+            preds = models[0][0].predict(imgs_320)
+        if models[0][1] == 512:
+            preds = models[0][0].predict(imgs_512)
+        preds = np.array([resize(pred, (1024, 1024), mode='reflect') for pred in preds])
+
+        for model, format in models[1:]:
+            if format == 320:
+                sub_pred = model.predict(imgs_320)
+                sub_pred = np.array([resize(pred, (1024, 1024), mode='reflect') for pred in sub_pred])
+                preds = preds + sub_pred
+
+            if format == 512:
+                sub_pred = model.predict(imgs_512)
+                sub_pred = np.array([resize(pred, (1024, 1024), mode='reflect') for pred in sub_pred])
+                preds = preds + sub_pred
+
+        preds = preds / float(len(models))
         # loop through batch
         for pred, filename in zip(preds, filenames):
             # resize predicted mask
-            pred = resize(pred, (1024, 1024), mode='reflect')
-            prediction_string = compute_pred_with_mask(pred)
+            # pred = resize(pred, (1024, 1024), mode='reflect')
+            prediction_string = compute_pred_with_mask(pred, filename)
 
             # add filename and prediction_string to dictionary
             filename = filename.split('.')[0]
@@ -36,6 +77,7 @@ def make_submission(model,
         # stop if we've got them all
         if len(submission_dict) >= len(test_filenames):
             break
+        print(len(submission_dict), '/', len(test_filenames))
 
     print("Done predicting...")
 
@@ -52,11 +94,7 @@ if __name__ == '__main__':
 
     test_filenames = os.listdir(OUTPUT_TEST)
 
-    model = create_network(input_size=IMAGE_SIZE, channels=32, n_blocks=2, depth=4)
-    model.compile(optimizer='adam',
-                  loss=iou_bce_loss,
-                  metrics=['accuracy', mean_iou])
-    model.load_weights('weights/weights-improvement-12-0.40490.hdf5')
+    models = get_models()
 
     train_filenames, valid_filenames = load_filenames(n_valid_samples=2560, folder=INPUT_TRAIN_MODEL)
     pneumonia_locations = load_pneumonia_locations()
@@ -64,21 +102,28 @@ if __name__ == '__main__':
     valid_gen = generator(INPUT_TRAIN_MODEL, valid_filenames, pneumonia_locations, batch_size=BATCH_SIZE,
                           image_size=IMAGE_SIZE, shuffle=False, predict=False)
 
-    train_gen = generator(INPUT_TRAIN_MODEL, train_filenames, pneumonia_locations, batch_size=BATCH_SIZE,
-                          image_size=IMAGE_SIZE, shuffle=False, predict=False)
+    # check_model_on_val(valid_gen, models[0])
 
-    check_model_on_val(valid_gen, model)
+    test_gen_320 = generator(INPUT_TEST_MODEL,
+                             filenames=test_filenames,
+                             pneumonia_locations=None,
+                             batch_size=BATCH_SIZE,
+                             image_size=320,
+                             shuffle=False,
+                             predict=True)
 
-    test_gen = generator(INPUT_TEST_MODEL,
-                         filenames=test_filenames,
-                         pneumonia_locations=None,
-                         batch_size=BATCH_SIZE,
-                         image_size=IMAGE_SIZE,
-                         shuffle=False,
-                         predict=True)
+    test_gen_512 = generator(INPUT_TEST_MODEL,
+                             filenames=test_filenames,
+                             pneumonia_locations=None,
+                             batch_size=BATCH_SIZE,
+                             image_size=512,
+                             shuffle=False,
+                             predict=True)
 
     # create submission
-    make_submission(model,
-                    test_gen,
+    make_submission(models,
+                    test_gen_320,
+                    test_gen_512,
                     test_filenames,
+                    batch_size=BATCH_SIZE,
                     submission_name='submission.csv')
