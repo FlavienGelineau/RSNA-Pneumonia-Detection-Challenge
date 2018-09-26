@@ -22,9 +22,12 @@ def compute_pred_with_mask(pred, filename):
 
 
 def compute_optimal_threshold(filename):
+    filename_formatted = filename.split('.bmp')[0]
     metadata = pd.read_csv('../meta_data_processing/test_metadata.csv')
-    data = metadata[metadata['filenames']==filename]
-    if data['ViewPosition']=='AP':
-        return 0.25
+    data = metadata[metadata['filenames']==filename_formatted]
+    if data['ViewPosition'].values[0]=='AP':
+        return 0.45
     else:
         return 0.5
+
+compute_optimal_threshold("13752451-7571-4b2a-8f3e-b71a6b6e91a2.dcm")

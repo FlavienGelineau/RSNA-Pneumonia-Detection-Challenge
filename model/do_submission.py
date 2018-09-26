@@ -14,6 +14,10 @@ from model.pred_construction import compute_pred_with_mask
 from paths import OUTPUT_TEST, OUTPUT_TRAIN, INPUT_TRAIN, INPUT_TRAIN_MODEL, INPUT_TEST_MODEL
 
 
+def aggregate_preds(models):
+    pass
+
+
 def get_models():
     model1 = create_network(input_size=512, channels=24, n_blocks=2, depth=4)
     model1.compile(optimizer='adam',
@@ -33,7 +37,7 @@ def get_models():
                    metrics=['accuracy', mean_iou])
     model3.load_weights('weights/weights-improvement-18-0.40025_public_0118.hdf5')
 
-    return [[model1, 512], [model2, 320], [model3, 320]]
+    return [[model1, 512, 0.6], [model2, 320, 0.2], [model3, 320, 0.2]]
 
 
 def make_submission(models,
@@ -47,20 +51,21 @@ def make_submission(models,
     # loop through testset
     for (imgs_320, _), (imgs_512, filenames) in zip(test_gen_320, test_gen_512):
         # predict batch of images
-        if models[0][1] == 320:
-            preds = models[0][0].predict(imgs_320)
-        if models[0][1] == 512:
-            preds = models[0][0].predict(imgs_512)
+        model, format, weight = models[0]
+        if format == 320:
+            preds = weight * model.predict(imgs_320)
+        if format == 512:
+            preds = weight * model.predict(imgs_512)
         preds = np.array([resize(pred, (1024, 1024), mode='reflect') for pred in preds])
 
-        for model, format in models[1:]:
+        for model, format, weight in models[1:]:
             if format == 320:
-                sub_pred = model.predict(imgs_320)
+                sub_pred = weight * model.predict(imgs_320)
                 sub_pred = np.array([resize(pred, (1024, 1024), mode='reflect') for pred in sub_pred])
                 preds = preds + sub_pred
 
             if format == 512:
-                sub_pred = model.predict(imgs_512)
+                sub_pred = weight * model.predict(imgs_512)
                 sub_pred = np.array([resize(pred, (1024, 1024), mode='reflect') for pred in sub_pred])
                 preds = preds + sub_pred
 
