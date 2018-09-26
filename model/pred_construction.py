@@ -2,6 +2,7 @@ from skimage import measure
 import numpy as np
 import pandas as pd
 
+
 def compute_pred_with_mask(pred, filename):
     threshold = compute_optimal_threshold(filename)
     comp = pred[:, :, 0] > threshold
@@ -15,7 +16,7 @@ def compute_pred_with_mask(pred, filename):
         height = y2 - y
         width = x2 - x
         # proxy for confidence score
-        conf = np.mean(pred[y:y + height, x:x + width])
+        conf = min(1, np.mean(pred[y:y + height, x:x + width]) * compute_optimal_threshold(filename) / 0.2)
         # add to predictionString
         prediction_string += str(conf) + ' ' + str(x) + ' ' + str(y) + ' ' + str(width) + ' ' + str(height) + ' '
     return prediction_string
@@ -24,10 +25,12 @@ def compute_pred_with_mask(pred, filename):
 def compute_optimal_threshold(filename):
     filename_formatted = filename.split('.bmp')[0]
     metadata = pd.read_csv('../meta_data_processing/test_metadata.csv')
-    data = metadata[metadata['filenames']==filename_formatted]
-    if data['ViewPosition'].values[0]=='AP':
-        return 0.45
+    data = metadata[metadata['filenames'] == filename_formatted]
+    if data['ViewPosition'].values[0] == 'AP':
+        return 0.18
     else:
-        return 0.5
+        return 0.2
 
-compute_optimal_threshold("13752451-7571-4b2a-8f3e-b71a6b6e91a2.dcm")
+
+if __name__ == '__main__':
+    compute_optimal_threshold("13752451-7571-4b2a-8f3e-b71a6b6e91a2.dcm")

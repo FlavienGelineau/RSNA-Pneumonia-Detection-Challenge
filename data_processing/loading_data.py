@@ -46,6 +46,7 @@ def load_pneumonia_locations():
 def load_filenames(n_valid_samples, folder):
     # load and shuffle filenames
     filenames = os.listdir(folder)
+    random.seed(42)
     random.shuffle(filenames)
     # split into train and validation filenames
     train_filenames = filenames[n_valid_samples:]

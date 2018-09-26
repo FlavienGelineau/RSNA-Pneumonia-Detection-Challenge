@@ -37,7 +37,7 @@ def get_models():
                    metrics=['accuracy', mean_iou])
     model3.load_weights('weights/weights-improvement-18-0.40025_public_0118.hdf5')
 
-    return [[model1, 512, 0.6], [model2, 320, 0.2], [model3, 320, 0.2]]
+    return [[model1, 512, 0.5], [model2, 320, 0.25], [model3, 320, 0.25]]
 
 
 def make_submission(models,
@@ -69,7 +69,6 @@ def make_submission(models,
                 sub_pred = np.array([resize(pred, (1024, 1024), mode='reflect') for pred in sub_pred])
                 preds = preds + sub_pred
 
-        preds = preds / float(len(models))
         # loop through batch
         for pred, filename in zip(preds, filenames):
             # resize predicted mask
