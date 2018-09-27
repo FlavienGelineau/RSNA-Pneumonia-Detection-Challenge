@@ -121,6 +121,13 @@ def create_network(local_input_size, global_input_size, channels, n_blocks=2, de
         inputs=[local_inputs, global_map_inputs, global_position_inputs], outputs=outputs)
     return model
 
+# Focal loss for dynamically adjusted loss function
+def focal_loss(gamma=2., alpha=.25):
+	def focal_loss_fixed(y_true, y_pred):
+		pt_1 = tf.where(tf.equal(y_true, 1), y_pred, tf.ones_like(y_pred))
+        	pt_0 = tf.where(tf.equal(y_true, 0), y_pred, tf.zeros_like(y_pred))
+        	return -K.sum(alpha * K.pow(1. - pt_1, gamma) * K.log(pt_1))-K.sum((1-alpha) * K.pow( pt_0, gamma) * K.log(1. - pt_0))
+    return focal_loss_fixed
 
 # define iou or jaccard loss function
 def iou_loss(y_true, y_pred):
@@ -134,7 +141,7 @@ def iou_loss(y_true, y_pred):
 
 # combine bce loss and iou loss
 def iou_bce_loss(y_true, y_pred):
-    return 0.5 * keras.losses.binary_crossentropy(y_true, y_pred) + 0.5 * iou_loss(y_true, y_pred)
+    return 0.5 * focal_loss(y_true, y_pred) + 0.5 * iou_loss(y_true, y_pred)
 
 
 # mean iou as a metric
