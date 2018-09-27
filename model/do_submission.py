@@ -20,24 +20,29 @@ def aggregate_preds(models):
 
 def get_models():
     model1 = create_network(input_size=512, channels=24, n_blocks=2, depth=4)
-    model1.compile(optimizer='adam',
-                   loss=iou_bce_loss,
-                   metrics=['accuracy', mean_iou])
     model1.load_weights('weights/weights-22-0.40075-512-10_public_0118.hdf5')
 
     model2 = create_network(input_size=320, channels=32, n_blocks=2, depth=4)
-    model2.compile(optimizer='adam',
-                   loss=iou_bce_loss,
-                   metrics=['accuracy', mean_iou])
     model2.load_weights('weights/weights-improvement-13-0.39958_public_0122.hdf5')
 
     model3 = create_network(input_size=320, channels=32, n_blocks=2, depth=4)
-    model3.compile(optimizer='adam',
-                   loss=iou_bce_loss,
-                   metrics=['accuracy', mean_iou])
     model3.load_weights('weights/weights-improvement-18-0.40025_public_0118.hdf5')
 
-    return [[model1, 512, 0.5], [model2, 320, 0.25], [model3, 320, 0.25]]
+    model4 = create_network(input_size=512, channels=24, n_blocks=2, depth=4)
+    model4.load_weights('weights/weights-10-0.40313-512-10.hdf5')
+
+    model5 = create_network(input_size=512, channels=24, n_blocks=2, depth=4)
+    model5.load_weights('weights/weights-08-0.40680-512-10.hdf5')
+
+    models = [
+        [model1, 512, 0.2], [model4, 512, 0.2], [model5, 512, 0.2],
+        [model2, 320, 0.2], [model3, 320, 0.2]
+    ]
+    for model, _, _ in models:
+        model.compile(optimizer='adam',
+                      loss=iou_bce_loss,
+                      metrics=['accuracy', mean_iou])
+    return models
 
 
 def make_submission(models,
@@ -103,10 +108,16 @@ if __name__ == '__main__':
     train_filenames, valid_filenames = load_filenames(n_valid_samples=2560, folder=INPUT_TRAIN_MODEL)
     pneumonia_locations = load_pneumonia_locations()
 
-    valid_gen = generator(INPUT_TRAIN_MODEL, valid_filenames, pneumonia_locations, batch_size=BATCH_SIZE,
-                          image_size=IMAGE_SIZE, shuffle=False, predict=False)
+    valid_gen = generator(INPUT_TRAIN_MODEL,
+                          valid_filenames,
+                          pneumonia_locations,
+                          batch_size=BATCH_SIZE,
+                          image_size=IMAGE_SIZE,
+                          shuffle=False,
+                          predict=False)
 
-    # check_model_on_val(valid_gen, models[0])
+    check_model_on_val(valid_gen, models[3][0])
+
 
     test_gen_320 = generator(INPUT_TEST_MODEL,
                              filenames=test_filenames,

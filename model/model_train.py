@@ -24,7 +24,7 @@ def get_callbacks(img_size, batch_size):
 
     # cosine learning rate annealing
     def cosine_annealing(x):
-        lr = 0.001
+        lr = 0.0013
         epochs = 20
         return lr * (np.cos(np.pi * x / epochs) + 1.) / 2
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
                   loss=iou_bce_loss,
                   metrics=['accuracy', mean_iou])
     try:
-        model.load_weights('None')
+        model.load_weights('weights/weights-10-0.40313-512-10.hdf5')
     except:
         print('model weights couldnt have been loaded')
 
